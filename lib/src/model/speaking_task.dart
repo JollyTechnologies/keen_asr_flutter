@@ -1,0 +1,4 @@
+enum SpeakingTask {
+  defaultTask,
+  oralReading,
+}
