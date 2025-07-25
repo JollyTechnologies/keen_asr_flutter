@@ -1,0 +1,40 @@
+PODS:
+  - Flutter (1.0.0)
+  - integration_test (0.0.1):
+    - Flutter
+  - keen_asr (0.0.1):
+    - Flutter
+  - permission_handler_apple (9.3.0):
+    - Flutter
+  - utopia_platform_utils (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - Flutter (from `Flutter`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - keen_asr (from `.symlinks/plugins/keen_asr/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
+  - utopia_platform_utils (from `.symlinks/plugins/utopia_platform_utils/ios`)
+
+EXTERNAL SOURCES:
+  Flutter:
+    :path: Flutter
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+  keen_asr:
+    :path: ".symlinks/plugins/keen_asr/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
+  utopia_platform_utils:
+    :path: ".symlinks/plugins/utopia_platform_utils/ios"
+
+SPEC CHECKSUMS:
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  keen_asr: 617e31c38fe210a89619aa3e047780dd7ca3ed8b
+  permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
+  utopia_platform_utils: 0a640261a47c3e4520ce684affdd0ee083ebdf85
+
+PODFILE CHECKSUM: 18f564d13aed1369e1775a413099d598f37d2df8
+
+COCOAPODS: 1.16.2

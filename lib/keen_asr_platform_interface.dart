@@ -1,9 +1,11 @@
+import 'dart:async';
+
 import 'package:keen_asr/src/model/alternative_pronunciation.dart';
 import 'package:keen_asr/src/model/asr_result.dart';
 import 'package:keen_asr/src/model/speaking_task.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
-import 'keen_asr_method_channel.dart';
+import 'src/method_channel/keen_asr_method_channel.dart';
 
 abstract class KeenASRPlatform extends PlatformInterface {
   KeenASRPlatform() : super(token: _token);
@@ -19,7 +21,7 @@ abstract class KeenASRPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  Future<bool> prepare({required Uri? webSdkUri});
+  FutureOr<bool> prepare({required Uri? webSdkUri});
 
   Future<bool> initialize(String bundleName, {required Uri? webUri});
 

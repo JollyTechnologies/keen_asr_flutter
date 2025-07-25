@@ -19,3 +19,21 @@ subprojects {
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }
+
+project(":keen_asr") {
+    apply(plugin = "com.android.library")
+    val compileOnly by configurations
+
+    dependencies {
+        compileOnly(rootProject.files("lib/KeenASR-2.0.2.aar"))
+    }
+}
+
+project(":app") {
+    apply(plugin = "com.android.application")
+    val runtimeOnly by configurations
+
+    dependencies {
+        runtimeOnly(rootProject.files("lib/KeenASR-2.0.2.aar"))
+    }
+}

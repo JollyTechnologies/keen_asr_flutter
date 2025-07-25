@@ -26,4 +26,6 @@ KeenASR SDK
   # plugin's privacy impact, and then uncomment this line. For more information,
   # see https://developer.apple.com/documentation/bundleresources/privacy_manifest_files
   # s.resource_bundles = {'keen_asr_privacy' => ['Resources/PrivacyInfo.xcprivacy']}
+
+  s.vendored_frameworks = 'KeenASR.framework'
 end

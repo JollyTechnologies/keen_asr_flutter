@@ -1,7 +1,9 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:keen_asr/keen_asr.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 void main() {
   runApp(const MyApp());
@@ -62,8 +64,13 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> _initPlatformState() async {
+    if(!await Permission.microphone.request().isGranted) return;
     await _keenAsrPlugin.prepare(webSdkUri: Uri.parse("/keenasr-0.4.8/"));
-    await _keenAsrPlugin.initialize('keenAK1m-nnet3chain-en-us', webUri: Uri.parse("/keenAK1m-nnet3chain-en-us.tgz"));
+    if(kIsWeb) {
+      await _keenAsrPlugin.initialize('keenAK1m-nnet3chain-en-us', webUri: Uri.parse("/keenAK1m-nnet3chain-en-us.tgz"));
+    } else {
+      await _keenAsrPlugin.initialize('keenA1m-nnet3chain-en-us');
+    }
     await _keenAsrPlugin.createDecodingGraph(
       phrases: _phrases,
       name: "default",
