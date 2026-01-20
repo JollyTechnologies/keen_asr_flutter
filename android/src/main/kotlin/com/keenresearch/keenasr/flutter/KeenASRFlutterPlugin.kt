@@ -41,6 +41,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
     override fun initializeWithAsset(bundleName: String, callback: (Result<Boolean>) -> Unit) =
         launchPigeon(callback, Dispatchers.IO) {
             KASRBundle(context).installASRBundle(bundleName, context.cacheDir.path) || return@launchPigeon false
+            if (KASRRecognizer.sharedInstance() != null) KASRRecognizer.teardown() || return@launchPigeon false
             KASRRecognizer.initWithASRBundleAtPath(context.cacheDir.resolve(bundleName).path, context)
                     || return@launchPigeon false
             recognizer.addListener(listener)
@@ -51,7 +52,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
         phrases: List<String>,
         speakingTask: NativeSpeakingTask,
         name: String,
-        callback: (Result<Boolean>) -> Unit
+        callback: (Result<Boolean>) -> Unit,
     ) = launchPigeon(callback, Dispatchers.IO) {
         KASRDecodingGraph.createDecodingGraphFromPhrases(
             phrases.toTypedArray(),
@@ -66,7 +67,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
     override fun prepareForListeningWithDecodingGraphWithName(
         name: String,
         computeGop: Boolean,
-        callback: (Result<Boolean>) -> Unit
+        callback: (Result<Boolean>) -> Unit,
     ) = launchPigeon(callback, Dispatchers.IO) {
         recognizer.prepareForListeningWithDecodingGraphWithName(name, computeGop)
     }
