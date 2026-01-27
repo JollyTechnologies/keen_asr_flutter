@@ -1,17 +1,23 @@
-@ConfigurePigeon(PigeonOptions(
-  dartOut: 'lib/src/method_channel/native_keen_asr.g.dart',
-  kotlinOut: 'android/src/main/kotlin/com/keenresearch/keenasr/flutter/NativeKeenASR.g.kt',
-  kotlinOptions: KotlinOptions(package: "com.keenresearch.keenasr.flutter"),
-  swiftOut: 'ios/Classes/NativeKeenASR.g.swift',
-  dartPackageName: "keen_asr",
-))
+@ConfigurePigeon(
+  PigeonOptions(
+    dartOut: 'lib/src/method_channel/native_keen_asr.g.dart',
+    kotlinOut: 'android/src/main/kotlin/com/keenresearch/keenasr/flutter/NativeKeenASR.g.kt',
+    kotlinOptions: KotlinOptions(package: "com.keenresearch.keenasr.flutter"),
+    swiftOut: 'ios/Classes/NativeKeenASR.g.swift',
+    dartPackageName: "keen_asr",
+  ),
+)
 library;
 
 import 'package:pigeon/pigeon.dart';
 
-enum NativeSpeakingTask {
-  defaultTask,
-  oralReading,
+enum NativeSpeakingTask { defaultTask, oralReading }
+
+enum NativeVADParameter {
+  timeoutEndSilenceForAnyMatch,
+  timeoutEndSilenceForGoodMatch,
+  timeoutForNoSpeech,
+  timeoutMaxDuration,
 }
 
 class NativeASREvent {
@@ -36,16 +42,43 @@ class NativeASRPhone {
   const NativeASRPhone({required this.text, required this.score});
 }
 
+class NativeAlternativePronunciation {
+  final String text;
+  final String pronunciation;
+  final String? tag;
+
+  const NativeAlternativePronunciation({required this.text, required this.pronunciation, required this.tag});
+}
+
 @HostApi()
 abstract class NativeKeenASR {
   @async
   bool initializeWithAsset(String bundleName);
 
   @async
-  bool createDecodingGraphFromPhrases(List<String> phrases, NativeSpeakingTask speakingTask, String name);
+  void setVADParameter(NativeVADParameter parameter, double value);
+
+  @async
+  bool createDecodingGraphFromPhrases(
+    List<String> phrases,
+    NativeSpeakingTask speakingTask,
+    String name,
+    List<NativeAlternativePronunciation> alternativePronunciations,
+  );
+
+  @async
+  bool createContextualDecodingGraphFromPhrases(
+    List<List<String>> contextualPhrases,
+    NativeSpeakingTask speakingTask,
+    String name,
+    List<NativeAlternativePronunciation> alternativePronunciations,
+  );
 
   @async
   bool prepareForListeningWithDecodingGraphWithName(String name, bool computeGop);
+
+  @async
+  bool prepareForListeningWithContextualDecodingGraphWithName(String name, int contextId, bool computeGop);
 
   @async
   bool startListening();

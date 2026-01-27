@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:keen_asr/src/model/alternative_pronunciation.dart';
 import 'package:keen_asr/src/model/asr_result.dart';
 import 'package:keen_asr/src/model/speaking_task.dart';
+import 'package:keen_asr/src/model/vad_parameter.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 
 import 'src/method_channel/keen_asr_method_channel.dart';
@@ -21,9 +22,11 @@ abstract class KeenASRPlatform extends PlatformInterface {
     _instance = instance;
   }
 
-  FutureOr<bool> prepare({required Uri? webSdkUri});
+  FutureOr<void> prepare({required Uri? webSdkUri});
 
   Future<bool> initialize(String bundleName, {required Uri? webUri});
+
+  Future<void> setVADParameter(VADParameter parameter, double value);
 
   Future<bool> createDecodingGraphFromPhrases(
     List<String> phrases,
@@ -32,7 +35,20 @@ abstract class KeenASRPlatform extends PlatformInterface {
     List<AlternativePronunciation> alternativePronunciations,
   );
 
+  Future<bool> createContextualDecodingGraphFromPhrases(
+    List<List<String>> contextualPhrases,
+    SpeakingTask speakingTask,
+    String name,
+    List<AlternativePronunciation> alternativePronunciations,
+  );
+
   Future<bool> prepareForListeningWithDecodingGraphWithName(String name, {required bool computeGop});
+
+  Future<bool> prepareForListeningWithContextualDecodingGraphWithName(
+    String name,
+    int contextId, {
+    required bool computeGop,
+  });
 
   Future<bool> startListening();
 

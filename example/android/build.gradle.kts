@@ -25,7 +25,7 @@ project(":keen_asr") {
     val compileOnly by configurations
 
     dependencies {
-        compileOnly(rootProject.files("lib/KeenASR-2.0.2.aar"))
+        compileOnly(rootProject.files("lib/KeenASR-2.1.aar"))
     }
 }
 
@@ -34,6 +34,6 @@ project(":app") {
     val runtimeOnly by configurations
 
     dependencies {
-        runtimeOnly(rootProject.files("lib/KeenASR-2.0.2.aar"))
+        runtimeOnly(rootProject.files("lib/KeenASR-2.1.aar"))
     }
 }

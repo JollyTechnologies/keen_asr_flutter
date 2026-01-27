@@ -65,9 +65,9 @@ class _MyAppState extends State<MyApp> {
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> _initPlatformState() async {
     if(!await Permission.microphone.request().isGranted) return;
-    await _keenAsrPlugin.prepare(webSdkUri: Uri.parse("/keenasr-0.4.8/"));
+    await _keenAsrPlugin.prepare(webSdkUri: Uri.parse("/keenasr-2.1.1/"));
     if(kIsWeb) {
-      await _keenAsrPlugin.initialize('keenAK1m-nnet3chain-en-us', webUri: Uri.parse("/keenAK1m-nnet3chain-en-us.tgz"));
+      await _keenAsrPlugin.initialize('keenAK3m-nnet3chain-en-us', webUri: Uri.parse("/keenAK3m-nnet3chain-en-us.tar"));
     } else {
       await _keenAsrPlugin.initialize('keenA1m-nnet3chain-en-us');
     }

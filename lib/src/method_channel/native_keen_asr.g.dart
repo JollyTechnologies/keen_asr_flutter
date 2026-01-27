@@ -34,6 +34,13 @@ enum NativeSpeakingTask {
   oralReading,
 }
 
+enum NativeVADParameter {
+  timeoutEndSilenceForAnyMatch,
+  timeoutEndSilenceForGoodMatch,
+  timeoutForNoSpeech,
+  timeoutMaxDuration,
+}
+
 class NativeASREvent {
   NativeASREvent({
     required this.text,
@@ -177,6 +184,57 @@ class NativeASRPhone {
 ;
 }
 
+class NativeAlternativePronunciation {
+  NativeAlternativePronunciation({
+    required this.text,
+    required this.pronunciation,
+    this.tag,
+  });
+
+  String text;
+
+  String pronunciation;
+
+  String? tag;
+
+  List<Object?> _toList() {
+    return <Object?>[
+      text,
+      pronunciation,
+      tag,
+    ];
+  }
+
+  Object encode() {
+    return _toList();  }
+
+  static NativeAlternativePronunciation decode(Object result) {
+    result as List<Object?>;
+    return NativeAlternativePronunciation(
+      text: result[0]! as String,
+      pronunciation: result[1]! as String,
+      tag: result[2] as String?,
+    );
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  bool operator ==(Object other) {
+    if (other is! NativeAlternativePronunciation || other.runtimeType != runtimeType) {
+      return false;
+    }
+    if (identical(this, other)) {
+      return true;
+    }
+    return _deepEquals(encode(), other.encode());
+  }
+
+  @override
+  // ignore: avoid_equals_and_hash_code_on_mutable_classes
+  int get hashCode => Object.hashAll(_toList())
+;
+}
+
 
 class _PigeonCodec extends StandardMessageCodec {
   const _PigeonCodec();
@@ -188,14 +246,20 @@ class _PigeonCodec extends StandardMessageCodec {
     }    else if (value is NativeSpeakingTask) {
       buffer.putUint8(129);
       writeValue(buffer, value.index);
-    }    else if (value is NativeASREvent) {
+    }    else if (value is NativeVADParameter) {
       buffer.putUint8(130);
-      writeValue(buffer, value.encode());
-    }    else if (value is NativeASRWord) {
+      writeValue(buffer, value.index);
+    }    else if (value is NativeASREvent) {
       buffer.putUint8(131);
       writeValue(buffer, value.encode());
-    }    else if (value is NativeASRPhone) {
+    }    else if (value is NativeASRWord) {
       buffer.putUint8(132);
+      writeValue(buffer, value.encode());
+    }    else if (value is NativeASRPhone) {
+      buffer.putUint8(133);
+      writeValue(buffer, value.encode());
+    }    else if (value is NativeAlternativePronunciation) {
+      buffer.putUint8(134);
       writeValue(buffer, value.encode());
     } else {
       super.writeValue(buffer, value);
@@ -209,11 +273,16 @@ class _PigeonCodec extends StandardMessageCodec {
         final int? value = readValue(buffer) as int?;
         return value == null ? null : NativeSpeakingTask.values[value];
       case 130: 
-        return NativeASREvent.decode(readValue(buffer)!);
+        final int? value = readValue(buffer) as int?;
+        return value == null ? null : NativeVADParameter.values[value];
       case 131: 
-        return NativeASRWord.decode(readValue(buffer)!);
+        return NativeASREvent.decode(readValue(buffer)!);
       case 132: 
+        return NativeASRWord.decode(readValue(buffer)!);
+      case 133: 
         return NativeASRPhone.decode(readValue(buffer)!);
+      case 134: 
+        return NativeAlternativePronunciation.decode(readValue(buffer)!);
       default:
         return super.readValueOfType(type, buffer);
     }
@@ -263,14 +332,65 @@ class NativeKeenASR {
     }
   }
 
-  Future<bool> createDecodingGraphFromPhrases(List<String> phrases, NativeSpeakingTask speakingTask, String name) async {
+  Future<void> setVADParameter(NativeVADParameter parameter, double value) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.keen_asr.NativeKeenASR.setVADParameter$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[parameter, value]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else {
+      return;
+    }
+  }
+
+  Future<bool> createDecodingGraphFromPhrases(List<String> phrases, NativeSpeakingTask speakingTask, String name, List<NativeAlternativePronunciation> alternativePronunciations) async {
     final String pigeonVar_channelName = 'dev.flutter.pigeon.keen_asr.NativeKeenASR.createDecodingGraphFromPhrases$pigeonVar_messageChannelSuffix';
     final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
       pigeonVar_channelName,
       pigeonChannelCodec,
       binaryMessenger: pigeonVar_binaryMessenger,
     );
-    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[phrases, speakingTask, name]);
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[phrases, speakingTask, name, alternativePronunciations]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  Future<bool> createContextualDecodingGraphFromPhrases(List<List<String>> contextualPhrases, NativeSpeakingTask speakingTask, String name, List<NativeAlternativePronunciation> alternativePronunciations) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.keen_asr.NativeKeenASR.createContextualDecodingGraphFromPhrases$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[contextualPhrases, speakingTask, name, alternativePronunciations]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {
@@ -299,6 +419,34 @@ class NativeKeenASR {
       binaryMessenger: pigeonVar_binaryMessenger,
     );
     final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[name, computeGop]);
+    final List<Object?>? pigeonVar_replyList =
+        await pigeonVar_sendFuture as List<Object?>?;
+    if (pigeonVar_replyList == null) {
+      throw _createConnectionError(pigeonVar_channelName);
+    } else if (pigeonVar_replyList.length > 1) {
+      throw PlatformException(
+        code: pigeonVar_replyList[0]! as String,
+        message: pigeonVar_replyList[1] as String?,
+        details: pigeonVar_replyList[2],
+      );
+    } else if (pigeonVar_replyList[0] == null) {
+      throw PlatformException(
+        code: 'null-error',
+        message: 'Host platform returned null value for non-null return value.',
+      );
+    } else {
+      return (pigeonVar_replyList[0] as bool?)!;
+    }
+  }
+
+  Future<bool> prepareForListeningWithContextualDecodingGraphWithName(String name, int contextId, bool computeGop) async {
+    final String pigeonVar_channelName = 'dev.flutter.pigeon.keen_asr.NativeKeenASR.prepareForListeningWithContextualDecodingGraphWithName$pigeonVar_messageChannelSuffix';
+    final BasicMessageChannel<Object?> pigeonVar_channel = BasicMessageChannel<Object?>(
+      pigeonVar_channelName,
+      pigeonChannelCodec,
+      binaryMessenger: pigeonVar_binaryMessenger,
+    );
+    final Future<Object?> pigeonVar_sendFuture = pigeonVar_channel.send(<Object?>[name, contextId, computeGop]);
     final List<Object?>? pigeonVar_replyList =
         await pigeonVar_sendFuture as List<Object?>?;
     if (pigeonVar_replyList == null) {

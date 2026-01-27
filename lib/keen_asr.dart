@@ -18,10 +18,7 @@ class KeenASR {
   void Function(ASRResult)? _onPartialResult, _onFinalResult;
 
   Future<void> prepare({Uri? webSdkUri}) async {
-    await KeenASRException.wrap(
-      operation: 'prepare()',
-      () async => KeenASRPlatform.instance.prepare(webSdkUri: webSdkUri),
-    );
+    await KeenASRPlatform.instance.prepare(webSdkUri: webSdkUri);
   }
 
   Future<void> initialize(String bundleName, {Uri? webUri}) async {

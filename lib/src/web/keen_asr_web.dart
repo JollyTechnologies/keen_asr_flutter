@@ -1,11 +1,11 @@
 import 'dart:js_interop';
+import 'dart:js_interop_unsafe';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
+import 'package:keen_asr/keen_asr.dart';
 import 'package:keen_asr/keen_asr_platform_interface.dart';
-import 'package:keen_asr/src/model/alternative_pronunciation.dart';
-import 'package:keen_asr/src/model/asr_result.dart';
-import 'package:keen_asr/src/model/speaking_task.dart';
+import 'package:keen_asr/src/model/vad_parameter.dart';
 import 'package:keen_asr/src/web/js_keen_asr.dart';
 import 'package:keen_asr/src/web/js_keen_asr_wrapper.dart';
 import 'package:web/web.dart';
@@ -15,34 +15,42 @@ class KeenASRWeb extends KeenASRPlatform {
     KeenASRPlatform.instance = KeenASRWeb();
   }
 
+  late JSKeenASRModule _module;
   late JSKeenASR _impl;
   late JSKeenASRWrapper _wrapper;
 
   @override
-  Future<bool> prepare({required Uri? webSdkUri}) async {
+  Future<void> prepare({required Uri? webSdkUri}) async {
     assert(webSdkUri != null, 'webSdkUri is required on web');
 
     final sdkUrl = _toAbsoluteUrl(webSdkUri!.resolve('keenasr-web.js'));
-    final module = JSKeenASRModule(await importModule(sdkUrl).toDart);
-    _impl = module.defaultExport;
+    _module = JSKeenASRModule(await importModule(sdkUrl).toDart);
+    _impl = _module.defaultExport;
     _wrapper = JSKeenASRWrapper(_impl);
 
     if (kDebugMode) {
       _wrapper.isIsolatedContext = () => true;
+      globalContext['KeenASR'] = _module;
     }
-
-    return await _wrapper.prepare();
   }
 
   @override
   Future<bool> initialize(String bundleName, {required Uri? webUri}) async {
     assert(webUri != null, 'webUri is required on web');
 
-    if (!await _wrapper.prepare()) return false;
-    if (!await _wrapper.isASRBundleAvailable(bundleName)) {
-      if (!await _wrapper.fetchASRBundle(_toAbsoluteUrl(webUri!))) return false;
-    }
-    return await _wrapper.initialize(bundleName);
+    await _wrapper.initialize(asrBundleURL: _toAbsoluteUrl(webUri!));
+    return true;
+  }
+
+  @override
+  Future<void> setVADParameter(VADParameter parameter, double value) async {
+    final parameters = switch (parameter) {
+      VADParameter.timeoutForNoSpeech => JSVADParameters(timeoutForNoSpeech: value),
+      VADParameter.timeoutEndSilenceForGoodMatch => JSVADParameters(timeoutEndSilenceForGoodMatch: value),
+      VADParameter.timeoutEndSilenceForAnyMatch => JSVADParameters(timeoutEndSilenceForAnyMatch: value),
+      VADParameter.timeoutMaxDuration => JSVADParameters(timeoutMaxDuration: value),
+    };
+    _wrapper.setVADParameters(parameters);
   }
 
   @override
@@ -53,29 +61,63 @@ class KeenASRWeb extends KeenASRPlatform {
     List<AlternativePronunciation> alternativePronunciations,
   ) {
     return _wrapper.createDecodingGraphFromPhrases(
-      phrases,
-      alternativePronunciations.map((it) => it.toJS).toList(),
-      speakingTask.toJS(_impl),
       name,
+      phrases,
+      speakingTask: speakingTask.toJS(_impl),
+      altProns: alternativePronunciations.toJS(_module),
     );
   }
 
   @override
-  Future<bool> prepareForListeningWithDecodingGraphWithName(String name, {required bool computeGop}) async =>
-      _wrapper.prepareForListeningWithCustomDecodingGraphWithName(name, computeGop);
+  Future<bool> createContextualDecodingGraphFromPhrases(
+    List<List<String>> contextualPhrases,
+    SpeakingTask speakingTask,
+    String name,
+    List<AlternativePronunciation> alternativePronunciations,
+  ) {
+    return _wrapper.createContextualDecodingGraphFromPhrases(
+      name,
+      contextualPhrases,
+      speakingTask: speakingTask.toJS(_impl),
+      altProns: alternativePronunciations.toJS(_module),
+    );
+  }
 
   @override
-  Future<bool> startListening() async => _wrapper.startListening();
+  Future<bool> prepareForListeningWithDecodingGraphWithName(String name, {required bool computeGop}) async {
+    _wrapper.prepareForListeningWithCustomDecodingGraphWithName(name, computeGop);
+    return true;
+  }
 
   @override
-  Future<bool> stopListening() async => _wrapper.stopListening();
+  Future<bool> prepareForListeningWithContextualDecodingGraphWithName(
+    String name,
+    int contextId, {
+    required bool computeGop,
+  }) async {
+    _wrapper.prepareForListeningWithContextualDecodingGraphWithNameAndContextId(name, contextId, computeGop);
+    return true;
+  }
+
+  @override
+  Future<bool> startListening() async {
+    await _wrapper.startListening();
+    return true;
+  }
+
+  @override
+  Future<bool> stopListening() async {
+    await _wrapper.stopListening();
+    return true;
+  }
 
   @override
   void setResultHandlers({
     required void Function(ASRResult result) onPartialResult,
     required void Function(ASRResult result) onFinalResult,
   }) {
-    _wrapper.setEventHandlers((it) => onPartialResult(it.toDart), (it) => onFinalResult(it.toDart), () {});
+    _wrapper.onPartialResult = (it) => onPartialResult(it.toDart);
+    _wrapper.onFinalResponse = (it) => onFinalResult(it.asrResult.toDart);
   }
 
   URL _toAbsoluteUrl(Uri uri) => URL(uri.toString(), window.location.href);
@@ -84,28 +126,33 @@ class KeenASRWeb extends KeenASRPlatform {
 extension on SpeakingTask {
   JSSpeakingTask toJS(JSKeenASR impl) {
     return switch (this) {
-      SpeakingTask.defaultTask => impl.SpeakingTask.kSpeakingTaskDefault,
-      SpeakingTask.oralReading => impl.SpeakingTask.kSpeakingTaskOralReading,
+      SpeakingTask.defaultTask => impl.SpeakingTask.DEFAULT,
+      SpeakingTask.oralReading => impl.SpeakingTask.ORAL_READING,
     };
   }
 }
 
+extension on AlternativePronunciation {
+  JSWordPronunciation toJS(JSKeenASRModule module) => module.WordPronunciation(text, pronunciation, tag);
+}
+
+extension on List<AlternativePronunciation> {
+  List<JSWordPronunciation> toJS(JSKeenASRModule module) => map((it) => it.toJS(module)).toList();
+}
+
 extension on JSASRResult {
-  ASRResult get toDart => ASRResult(text: text(), words: words().toDart.map((it) => it.toDart).toList());
+  ASRResult get toDart {
+    final wordsList = words?.toDart.map((it) => it.toDart).toList() ?? [];
+    return ASRResult(text: text, words: wordsList);
+  }
 }
 
 extension on JSASRWord {
   ASRWord get toDart {
-    return ASRWord(text: text, phones: phones().toDart.map((it) => it.toDart).toList());
+    return ASRWord(text: text, phones: phones.toDart.map((it) => it.toDart).toList());
   }
 }
 
 extension on JSASRPhone {
-  ASRPhone get toDart => ASRPhone(text: text, score: score.toDartDouble);
-}
-
-extension on AlternativePronunciation {
-  JSAlternativePronunciation get toJS {
-    return JSAlternativePronunciation(word: text, pronunciation: pronunciation, tag: tag);
-  }
+  ASRPhone get toDart => ASRPhone(text: text, score: pronunciationScore);
 }

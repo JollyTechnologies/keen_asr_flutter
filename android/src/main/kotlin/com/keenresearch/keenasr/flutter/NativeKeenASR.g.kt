@@ -89,6 +89,19 @@ enum class NativeSpeakingTask(val raw: Int) {
   }
 }
 
+enum class NativeVADParameter(val raw: Int) {
+  TIMEOUT_END_SILENCE_FOR_ANY_MATCH(0),
+  TIMEOUT_END_SILENCE_FOR_GOOD_MATCH(1),
+  TIMEOUT_FOR_NO_SPEECH(2),
+  TIMEOUT_MAX_DURATION(3);
+
+  companion object {
+    fun ofRaw(raw: Int): NativeVADParameter? {
+      return values().firstOrNull { it.raw == raw }
+    }
+  }
+}
+
 /** Generated class from Pigeon that represents data sent in messages. */
 data class NativeASREvent (
   val text: String,
@@ -184,6 +197,40 @@ data class NativeASRPhone (
 
   override fun hashCode(): Int = toList().hashCode()
 }
+
+/** Generated class from Pigeon that represents data sent in messages. */
+data class NativeAlternativePronunciation (
+  val text: String,
+  val pronunciation: String,
+  val tag: String? = null
+)
+ {
+  companion object {
+    fun fromList(pigeonVar_list: List<Any?>): NativeAlternativePronunciation {
+      val text = pigeonVar_list[0] as String
+      val pronunciation = pigeonVar_list[1] as String
+      val tag = pigeonVar_list[2] as String?
+      return NativeAlternativePronunciation(text, pronunciation, tag)
+    }
+  }
+  fun toList(): List<Any?> {
+    return listOf(
+      text,
+      pronunciation,
+      tag,
+    )
+  }
+  override fun equals(other: Any?): Boolean {
+    if (other !is NativeAlternativePronunciation) {
+      return false
+    }
+    if (this === other) {
+      return true
+    }
+    return NativeKeenASRPigeonUtils.deepEquals(toList(), other.toList())  }
+
+  override fun hashCode(): Int = toList().hashCode()
+}
 private open class NativeKeenASRPigeonCodec : StandardMessageCodec() {
   override fun readValueOfType(type: Byte, buffer: ByteBuffer): Any? {
     return when (type) {
@@ -193,18 +240,28 @@ private open class NativeKeenASRPigeonCodec : StandardMessageCodec() {
         }
       }
       130.toByte() -> {
-        return (readValue(buffer) as? List<Any?>)?.let {
-          NativeASREvent.fromList(it)
+        return (readValue(buffer) as Long?)?.let {
+          NativeVADParameter.ofRaw(it.toInt())
         }
       }
       131.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
-          NativeASRWord.fromList(it)
+          NativeASREvent.fromList(it)
         }
       }
       132.toByte() -> {
         return (readValue(buffer) as? List<Any?>)?.let {
+          NativeASRWord.fromList(it)
+        }
+      }
+      133.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
           NativeASRPhone.fromList(it)
+        }
+      }
+      134.toByte() -> {
+        return (readValue(buffer) as? List<Any?>)?.let {
+          NativeAlternativePronunciation.fromList(it)
         }
       }
       else -> super.readValueOfType(type, buffer)
@@ -216,16 +273,24 @@ private open class NativeKeenASRPigeonCodec : StandardMessageCodec() {
         stream.write(129)
         writeValue(stream, value.raw)
       }
-      is NativeASREvent -> {
+      is NativeVADParameter -> {
         stream.write(130)
-        writeValue(stream, value.toList())
+        writeValue(stream, value.raw)
       }
-      is NativeASRWord -> {
+      is NativeASREvent -> {
         stream.write(131)
         writeValue(stream, value.toList())
       }
-      is NativeASRPhone -> {
+      is NativeASRWord -> {
         stream.write(132)
+        writeValue(stream, value.toList())
+      }
+      is NativeASRPhone -> {
+        stream.write(133)
+        writeValue(stream, value.toList())
+      }
+      is NativeAlternativePronunciation -> {
+        stream.write(134)
         writeValue(stream, value.toList())
       }
       else -> super.writeValue(stream, value)
@@ -239,8 +304,11 @@ val NativeKeenASRPigeonMethodCodec = StandardMethodCodec(NativeKeenASRPigeonCode
 /** Generated interface from Pigeon that represents a handler of messages from Flutter. */
 interface NativeKeenASR {
   fun initializeWithAsset(bundleName: String, callback: (Result<Boolean>) -> Unit)
-  fun createDecodingGraphFromPhrases(phrases: List<String>, speakingTask: NativeSpeakingTask, name: String, callback: (Result<Boolean>) -> Unit)
+  fun setVADParameter(parameter: NativeVADParameter, value: Double, callback: (Result<Unit>) -> Unit)
+  fun createDecodingGraphFromPhrases(phrases: List<String>, speakingTask: NativeSpeakingTask, name: String, alternativePronunciations: List<NativeAlternativePronunciation>, callback: (Result<Boolean>) -> Unit)
+  fun createContextualDecodingGraphFromPhrases(contextualPhrases: List<List<String>>, speakingTask: NativeSpeakingTask, name: String, alternativePronunciations: List<NativeAlternativePronunciation>, callback: (Result<Boolean>) -> Unit)
   fun prepareForListeningWithDecodingGraphWithName(name: String, computeGop: Boolean, callback: (Result<Boolean>) -> Unit)
+  fun prepareForListeningWithContextualDecodingGraphWithName(name: String, contextId: Long, computeGop: Boolean, callback: (Result<Boolean>) -> Unit)
   fun startListening(callback: (Result<Boolean>) -> Unit)
   fun stopListening(callback: (Result<Boolean>) -> Unit)
 
@@ -274,6 +342,26 @@ interface NativeKeenASR {
         }
       }
       run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.keen_asr.NativeKeenASR.setVADParameter$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val parameterArg = args[0] as NativeVADParameter
+            val valueArg = args[1] as Double
+            api.setVADParameter(parameterArg, valueArg) { result: Result<Unit> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(NativeKeenASRPigeonUtils.wrapError(error))
+              } else {
+                reply.reply(NativeKeenASRPigeonUtils.wrapResult(null))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
         val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.keen_asr.NativeKeenASR.createDecodingGraphFromPhrases$separatedMessageChannelSuffix", codec)
         if (api != null) {
           channel.setMessageHandler { message, reply ->
@@ -281,7 +369,31 @@ interface NativeKeenASR {
             val phrasesArg = args[0] as List<String>
             val speakingTaskArg = args[1] as NativeSpeakingTask
             val nameArg = args[2] as String
-            api.createDecodingGraphFromPhrases(phrasesArg, speakingTaskArg, nameArg) { result: Result<Boolean> ->
+            val alternativePronunciationsArg = args[3] as List<NativeAlternativePronunciation>
+            api.createDecodingGraphFromPhrases(phrasesArg, speakingTaskArg, nameArg, alternativePronunciationsArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(NativeKeenASRPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(NativeKeenASRPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.keen_asr.NativeKeenASR.createContextualDecodingGraphFromPhrases$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val contextualPhrasesArg = args[0] as List<List<String>>
+            val speakingTaskArg = args[1] as NativeSpeakingTask
+            val nameArg = args[2] as String
+            val alternativePronunciationsArg = args[3] as List<NativeAlternativePronunciation>
+            api.createContextualDecodingGraphFromPhrases(contextualPhrasesArg, speakingTaskArg, nameArg, alternativePronunciationsArg) { result: Result<Boolean> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(NativeKeenASRPigeonUtils.wrapError(error))
@@ -303,6 +415,28 @@ interface NativeKeenASR {
             val nameArg = args[0] as String
             val computeGopArg = args[1] as Boolean
             api.prepareForListeningWithDecodingGraphWithName(nameArg, computeGopArg) { result: Result<Boolean> ->
+              val error = result.exceptionOrNull()
+              if (error != null) {
+                reply.reply(NativeKeenASRPigeonUtils.wrapError(error))
+              } else {
+                val data = result.getOrNull()
+                reply.reply(NativeKeenASRPigeonUtils.wrapResult(data))
+              }
+            }
+          }
+        } else {
+          channel.setMessageHandler(null)
+        }
+      }
+      run {
+        val channel = BasicMessageChannel<Any?>(binaryMessenger, "dev.flutter.pigeon.keen_asr.NativeKeenASR.prepareForListeningWithContextualDecodingGraphWithName$separatedMessageChannelSuffix", codec)
+        if (api != null) {
+          channel.setMessageHandler { message, reply ->
+            val args = message as List<Any?>
+            val nameArg = args[0] as String
+            val contextIdArg = args[1] as Long
+            val computeGopArg = args[2] as Boolean
+            api.prepareForListeningWithContextualDecodingGraphWithName(nameArg, contextIdArg, computeGopArg) { result: Result<Boolean> ->
               val error = result.exceptionOrNull()
               if (error != null) {
                 reply.reply(NativeKeenASRPigeonUtils.wrapError(error))

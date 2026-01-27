@@ -10,9 +10,13 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
     public static func register(with registrar: FlutterPluginRegistrar) {
         let instance = KeenAsrPlugin()
         NativeKeenASRSetup.setUp(
-            binaryMessenger: registrar.messenger(), api: instance)
+            binaryMessenger: registrar.messenger(),
+            api: instance
+        )
         NativeStreamKeenASREventsStreamHandler.register(
-            with: registrar.messenger(), streamHandler: StreamHandler(instance))
+            with: registrar.messenger(),
+            streamHandler: StreamHandler(instance)
+        )
     }
 
     func initializeWithAsset(
@@ -28,25 +32,80 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         }
     }
 
+    func setVADParameter(
+        parameter: NativeVADParameter,
+        value: Double,
+        completion: @escaping (Result<Void, any Error>) -> Void
+    ) {
+        launch(for: completion) {
+            recognizer().setVADParameter(
+                parameter.toIos(),
+                toValue: Float(value)
+            )
+        }
+    }
+
     func createDecodingGraphFromPhrases(
-        phrases: [String], speakingTask: NativeSpeakingTask, name: String,
+        phrases: [String],
+        speakingTask: NativeSpeakingTask,
+        name: String,
+        alternativePronunciations: [NativeAlternativePronunciation],
         completion: @escaping (Result<Bool, any Error>) -> Void
     ) {
         launch(for: completion) {
             KIOSDecodingGraph.createDecodingGraph(
-                fromPhrases: phrases, for: recognizer(),
-                using: nil, andTask: speakingTask.toIos(), andSaveWithName: name
+                fromPhrases: phrases,
+                for: recognizer(),
+                usingAlternativePronunciations: alternativePronunciations.map { $0.toIos() },
+                andTask: speakingTask.toIos(),
+                andSaveWithName: name
+            )
+        }
+    }
+
+    func createContextualDecodingGraphFromPhrases(
+        contextualPhrases: [[String]],
+        speakingTask: NativeSpeakingTask,
+        name: String,
+        alternativePronunciations: [NativeAlternativePronunciation],
+        completion: @escaping (Result<Bool, any Error>) -> Void
+    ) {
+        launch(for: completion) {
+            KIOSDecodingGraph.createContextualDecodingGraph(
+                fromPhrases: contextualPhrases,
+                for: recognizer(),
+                usingAlternativePronunciations: alternativePronunciations.map { $0.toIos() },
+                andTask: speakingTask.toIos(),
+                andSaveWithName: name
             )
         }
     }
 
     func prepareForListeningWithDecodingGraphWithName(
-        name: String, computeGop: Bool,
+        name: String,
+        computeGop: Bool,
         completion: @escaping (Result<Bool, any Error>) -> Void
     ) {
         launch(for: completion) {
             recognizer().prepareForListeningWithDecodingGraph(
-                withName: name, withGoPComputation: computeGop)
+                withName: name,
+                withGoPComputation: computeGop
+            )
+        }
+    }
+
+    func prepareForListeningWithContextualDecodingGraphWithName(
+        name: String,
+        contextId: Int64,
+        computeGop: Bool,
+        completion: @escaping (Result<Bool, any Error>) -> Void
+    ) {
+        launch(for: completion) {
+            recognizer().prepareForListeningWithContextualDecodingGraph(
+                withName: name,
+                andContextId: NSNumber(value: contextId),
+                withGoPComputation: computeGop
+            )
         }
     }
 
@@ -63,9 +122,9 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         }
     }
 
-    private func launch(
-        for completion: @escaping (Result<Bool, any Error>) -> Void,
-        _ block: @escaping () -> Bool
+    private func launch<T>(
+        for completion: @escaping (Result<T, any Error>) -> Void,
+        _ block: @escaping () -> T
     ) {
         DispatchQueue.global(qos: .userInitiated).async {
             completion(.success(block()))
@@ -75,13 +134,15 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
     public func unwindAppAudioBeforeAudioInterrupt() {}
 
     public func recognizerPartialResult(
-        _ result: KIOSResult, for recognizer: KIOSRecognizer
+        _ result: KIOSResult,
+        for recognizer: KIOSRecognizer
     ) {
         eventSink?.success(result.toDart(isFinal: false))
     }
 
     public func recognizerFinalResponse(
-        _ response: KIOSResponse, for recognizer: KIOSRecognizer
+        _ response: KIOSResponse,
+        for recognizer: KIOSRecognizer
     ) {
         eventSink?.success(response.result!.toDart(isFinal: true))
     }
@@ -95,7 +156,8 @@ private class StreamHandler: NativeStreamKeenASREventsStreamHandler {
     }
 
     override func onListen(
-        withArguments arguments: Any?, sink: PigeonEventSink<NativeASREvent>
+        withArguments arguments: Any?,
+        sink: PigeonEventSink<NativeASREvent>
     ) {
         plugin.eventSink = sink
     }
@@ -114,24 +176,48 @@ extension NativeSpeakingTask {
     }
 }
 
+extension NativeVADParameter {
+    func toIos() -> KIOSVadParameter {
+        switch self {
+        case .timeoutEndSilenceForAnyMatch: return .timeoutEndSilenceForAnyMatch
+        case .timeoutEndSilenceForGoodMatch:
+            return .timeoutEndSilenceForGoodMatch
+        case .timeoutForNoSpeech: return .timeoutForNoSpeech
+        case .timeoutMaxDuration: return .timeoutMaxDuration
+        }
+    }
+}
+
+extension NativeAlternativePronunciation {
+    func toIos() -> KIOSWordPronunciation {
+        return KIOSWordPronunciation(word: text, pronunciation: pronunciation, tag: tag)
+    }
+}
+
 extension KIOSResult {
     func toDart(isFinal: Bool) -> NativeASREvent {
         return NativeASREvent(
-            text: text, words: words?.map { $0.toDart() } ?? [],
-            isFinal: isFinal)
+            text: text,
+            words: words?.map { $0.toDart() } ?? [],
+            isFinal: isFinal
+        )
     }
 }
 
 extension KIOSWord {
     func toDart() -> NativeASRWord {
         return NativeASRWord(
-            text: text, phones: phones?.map { $0.toDart() } ?? [])
+            text: text,
+            phones: phones?.map { $0.toDart() } ?? []
+        )
     }
 }
 
 extension KIOSPhone {
     func toDart() -> NativeASRPhone {
         return NativeASRPhone(
-            text: text, score: pronunciationScore?.doubleValue ?? 0)
+            text: text,
+            score: pronunciationScore?.doubleValue ?? 0
+        )
     }
 }

@@ -14,7 +14,8 @@
 		3B65D3472E325D0800582128 /* libc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B65D3462E325D0800582128 /* libc++.tbd */; };
 		3B65D3492E325D7700582128 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3B65D3482E325D7700582128 /* Accelerate.framework */; };
 		3B65D4582E32634400582128 /* keenA1m-nnet3chain-en-us in Resources */ = {isa = PBXBuildFile; fileRef = 3B65D4572E32633400582128 /* keenA1m-nnet3chain-en-us */; };
-		3B65D4782E337E5A00582128 /* KeenASR.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3B65D4732E337C9300582128 /* KeenASR.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3BB235832F291E980059F2AB /* KeenASR.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3BB235812F291E900059F2AB /* KeenASR.framework */; };
+		3BB235842F291E980059F2AB /* KeenASR.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3BB235812F291E900059F2AB /* KeenASR.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
@@ -39,7 +40,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				3B65D4782E337E5A00582128 /* KeenASR.framework in Embed Frameworks */,
+				3BB235842F291E980059F2AB /* KeenASR.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -56,7 +57,7 @@
 		3B65D3462E325D0800582128 /* libc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libc++.tbd"; path = "usr/lib/libc++.tbd"; sourceTree = SDKROOT; };
 		3B65D3482E325D7700582128 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
 		3B65D4572E32633400582128 /* keenA1m-nnet3chain-en-us */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "keenA1m-nnet3chain-en-us"; sourceTree = "<group>"; };
-		3B65D4732E337C9300582128 /* KeenASR.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = KeenASR.framework; sourceTree = "<group>"; };
+		3BB235812F291E900059F2AB /* KeenASR.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = KeenASR.framework; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
@@ -91,6 +92,7 @@
 			files = (
 				3B65D3492E325D7700582128 /* Accelerate.framework in Frameworks */,
 				3B65D3472E325D0800582128 /* libc++.tbd in Frameworks */,
+				3BB235832F291E980059F2AB /* KeenASR.framework in Frameworks */,
 				C12682E2BCCB0B552CBA64F7 /* Pods_Runner.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -109,7 +111,7 @@
 		48581819EBB22FC65719C262 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				3B65D4732E337C9300582128 /* KeenASR.framework */,
+				3BB235812F291E900059F2AB /* KeenASR.framework */,
 				3B65D3482E325D7700582128 /* Accelerate.framework */,
 				3B65D3462E325D0800582128 /* libc++.tbd */,
 				C7032F0CA90DBED64CA99F11 /* Pods_Runner.framework */,
@@ -488,7 +490,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -628,7 +630,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -679,7 +681,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
