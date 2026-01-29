@@ -8,6 +8,7 @@ import 'keen_asr_platform_interface.dart';
 export 'src/model/alternative_pronunciation.dart';
 export 'src/model/asr_result.dart';
 export 'src/model/speaking_task.dart';
+export 'src/model/vad_parameter.dart';
 
 class KeenASR {
   KeenASR._();
@@ -32,6 +33,9 @@ class KeenASR {
     );
   }
 
+  Future<void> setVADParameter(VADParameter parameter, double value) async =>
+      KeenASRPlatform.instance.setVADParameter(parameter, value);
+
   Future<void> createDecodingGraph({
     required List<String> phrases,
     required String name,
@@ -49,10 +53,42 @@ class KeenASR {
     );
   }
 
+  Future<void> createContextualDecodingGraph({
+    required List<List<String>> contexts,
+    required String name,
+    SpeakingTask speakingTask = SpeakingTask.defaultTask,
+    List<AlternativePronunciation> alternativePronunciations = const [],
+  }) async {
+    await KeenASRException.wrap(
+      operation: 'createContextualDecodingGraphFromPhrases($name)',
+      () async => KeenASRPlatform.instance.createContextualDecodingGraphFromPhrases(
+        contexts,
+        speakingTask,
+        name,
+        alternativePronunciations,
+      ),
+    );
+  }
+
   Future<void> prepareForListeningWithDecodingGraph(String name, {bool computeGop = false}) async {
     await KeenASRException.wrap(
       operation: 'prepareForListeningWithDecodingGraph($name)',
       () async => KeenASRPlatform.instance.prepareForListeningWithDecodingGraphWithName(name, computeGop: computeGop),
+    );
+  }
+
+  Future<void> prepareForListeningWithContextualDecodingGraph(
+    String name, {
+    required int contextId,
+    bool computeGop = false,
+  }) async {
+    await KeenASRException.wrap(
+      operation: 'prepareForListeningWithContextualDecodingGraph($name, contextId: $contextId)',
+      () async => KeenASRPlatform.instance.prepareForListeningWithContextualDecodingGraphWithName(
+        name,
+        contextId,
+        computeGop: computeGop,
+      ),
     );
   }
 

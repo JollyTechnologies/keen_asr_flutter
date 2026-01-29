@@ -45,6 +45,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
             if (KASRRecognizer.sharedInstance() != null) KASRRecognizer.teardown() || return@launchPigeon false
             KASRRecognizer.initWithASRBundleAtPath(context.cacheDir.resolve(bundleName).path, context)
                     || return@launchPigeon false
+            KASRRecognizer.setLogLevel(KASRRecognizer.KASRRecognizerLogLevel.KASRRecognizerLogLevelDebug)
             recognizer.addListener(listener)
             return@launchPigeon true
         }

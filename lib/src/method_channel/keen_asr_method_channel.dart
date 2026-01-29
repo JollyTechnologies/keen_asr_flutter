@@ -57,7 +57,7 @@ class MethodChannelKeenASR extends KeenASRPlatform {
     String name,
     int contextId, {
     required bool computeGop,
-  }) => _native.prepareForListeningWithDecodingGraphWithName(name, computeGop);
+  }) => _native.prepareForListeningWithContextualDecodingGraphWithName(name, contextId, computeGop);
 
   @override
   Future<bool> startListening() => _native.startListening();
