@@ -64,6 +64,7 @@ abstract class NativeKeenASR {
     NativeSpeakingTask speakingTask,
     String name,
     List<NativeAlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   );
 
   @async
@@ -72,6 +73,7 @@ abstract class NativeKeenASR {
     NativeSpeakingTask speakingTask,
     String name,
     List<NativeAlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   );
 
   @async

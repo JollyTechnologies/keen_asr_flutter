@@ -63,6 +63,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
         speakingTask: NativeSpeakingTask,
         name: String,
         alternativePronunciations: List<NativeAlternativePronunciation>,
+        spokenNoiseProbability: Double,
         callback: (Result<Boolean>) -> Unit
     ) = launchPigeon(callback, Dispatchers.IO) {
         KASRDecodingGraph.createDecodingGraphFromPhrases(
@@ -70,7 +71,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
             recognizer,
             alternativePronunciations.toAndroid(),
             speakingTask.toAndroid(),
-            0.5f,
+            spokenNoiseProbability.toFloat(),
             name
         )
     }
@@ -80,6 +81,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
         speakingTask: NativeSpeakingTask,
         name: String,
         alternativePronunciations: List<NativeAlternativePronunciation>,
+        spokenNoiseProbability: Double,
         callback: (Result<Boolean>) -> Unit
     ) = launchPigeon(callback, Dispatchers.IO) {
         KASRDecodingGraph.createContextualDecodingGraphFromPhrases(
@@ -87,7 +89,7 @@ class KeenASRFlutterPlugin : BaseFlutterPlugin(), NativeKeenASR {
             recognizer,
             alternativePronunciations.toAndroid(),
             speakingTask.toAndroid(),
-            0.5f,
+            spokenNoiseProbability.toFloat(),
             name
         )
     }
@@ -129,7 +131,7 @@ private fun NativeVADParameter.toAndroid() = when (this) {
 }
 
 private fun List<NativeAlternativePronunciation>.toAndroid() =
-    ArrayList(map { KASRWordPronunciation(it.text, it.pronunciation, it.tag) })
+    ArrayList(map { KASRWordPronunciation(it.text, it.pronunciation, it.tag ?: "") })
 
 private fun KASRResult.toDart(isFinal: Boolean) = NativeASREvent(text, words.map { it.toDart() }, isFinal)
 

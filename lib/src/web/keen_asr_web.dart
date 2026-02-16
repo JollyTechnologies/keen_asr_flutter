@@ -59,12 +59,14 @@ class KeenASRWeb extends KeenASRPlatform {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   ) {
     return _wrapper.createDecodingGraphFromPhrases(
       name,
       phrases,
       speakingTask: speakingTask.toJS(_impl),
       altProns: alternativePronunciations.toJS(_module),
+      spokenNoiseProbability: spokenNoiseProbability,
     );
   }
 
@@ -74,12 +76,14 @@ class KeenASRWeb extends KeenASRPlatform {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   ) {
     return _wrapper.createContextualDecodingGraphFromPhrases(
       name,
       contextualPhrases,
       speakingTask: speakingTask.toJS(_impl),
       altProns: alternativePronunciations.toJS(_module),
+      spokenNoiseProbability: spokenNoiseProbability,
     );
   }
 

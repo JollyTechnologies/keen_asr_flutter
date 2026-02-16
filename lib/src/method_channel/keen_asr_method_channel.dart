@@ -33,7 +33,14 @@ class MethodChannelKeenASR extends KeenASRPlatform {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
-  ) => _native.createDecodingGraphFromPhrases(phrases, speakingTask.toNative, name, alternativePronunciations.toNative);
+    double spokenNoiseProbability,
+  ) => _native.createDecodingGraphFromPhrases(
+        phrases,
+        speakingTask.toNative,
+        name,
+        alternativePronunciations.toNative,
+        spokenNoiseProbability,
+      );
 
   @override
   Future<bool> createContextualDecodingGraphFromPhrases(
@@ -41,12 +48,14 @@ class MethodChannelKeenASR extends KeenASRPlatform {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   ) => _native.createContextualDecodingGraphFromPhrases(
-    contextualPhrases,
-    speakingTask.toNative,
-    name,
-    alternativePronunciations.toNative,
-  );
+        contextualPhrases,
+        speakingTask.toNative,
+        name,
+        alternativePronunciations.toNative,
+        spokenNoiseProbability,
+      );
 
   @override
   Future<bool> prepareForListeningWithDecodingGraphWithName(String name, {required bool computeGop}) =>

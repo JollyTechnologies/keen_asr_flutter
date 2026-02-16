@@ -33,6 +33,7 @@ abstract class KeenASRPlatform extends PlatformInterface {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   );
 
   Future<bool> createContextualDecodingGraphFromPhrases(
@@ -40,6 +41,7 @@ abstract class KeenASRPlatform extends PlatformInterface {
     SpeakingTask speakingTask,
     String name,
     List<AlternativePronunciation> alternativePronunciations,
+    double spokenNoiseProbability,
   );
 
   Future<bool> prepareForListeningWithDecodingGraphWithName(String name, {required bool computeGop});

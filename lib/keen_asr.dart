@@ -41,6 +41,7 @@ class KeenASR {
     required String name,
     SpeakingTask speakingTask = SpeakingTask.defaultTask,
     List<AlternativePronunciation> alternativePronunciations = const [],
+    double spokenNoiseProbability = 0.5,
   }) async {
     await KeenASRException.wrap(
       operation: 'createDecodingGraphFromPhrases($name)',
@@ -49,6 +50,7 @@ class KeenASR {
         speakingTask,
         name,
         alternativePronunciations,
+        spokenNoiseProbability,
       ),
     );
   }
@@ -58,6 +60,7 @@ class KeenASR {
     required String name,
     SpeakingTask speakingTask = SpeakingTask.defaultTask,
     List<AlternativePronunciation> alternativePronunciations = const [],
+    double spokenNoiseProbability = 0.5,
   }) async {
     await KeenASRException.wrap(
       operation: 'createContextualDecodingGraphFromPhrases($name)',
@@ -66,6 +69,7 @@ class KeenASR {
         speakingTask,
         name,
         alternativePronunciations,
+        spokenNoiseProbability,
       ),
     );
   }

@@ -30,9 +30,14 @@ class JSKeenASRWrapper {
     List<String> phrases, {
     required JSSpeakingTask speakingTask,
     List<JSWordPronunciation>? altProns,
+    required double spokenNoiseProbability,
   }) async {
     final jsPhrases = phrases.map((it) => it.toJS).toList().toJS;
-    final config = JSDecodingGraphConfig(altProns: altProns?.toJS, speakingTaskType: speakingTask);
+    final config = JSDecodingGraphConfig(
+      altProns: altProns?.toJS,
+      speakingTaskType: speakingTask,
+      spokenNoiseProb: spokenNoiseProbability,
+    );
     final jsPromise = _impl.createDecodingGraphFromPhrases(name, jsPhrases, config);
     return (await jsPromise.toDart).toDart;
   }
@@ -42,9 +47,14 @@ class JSKeenASRWrapper {
     List<List<String>> contexts, {
     required JSSpeakingTask speakingTask,
     List<JSWordPronunciation>? altProns,
+    required double spokenNoiseProbability,
   }) async {
     final jsContexts = contexts.map((it) => it.map((it) => it.toJS).toList().toJS).toList().toJS;
-    final config = JSDecodingGraphConfig(altProns: altProns?.toJS, speakingTaskType: speakingTask);
+    final config = JSDecodingGraphConfig(
+      altProns: altProns?.toJS,
+      speakingTaskType: speakingTask,
+      spokenNoiseProb: spokenNoiseProbability,
+    );
     final jsPromise = _impl.createContextualDecodingGraphFromPhrases(name, jsContexts, config);
     return (await jsPromise.toDart).toDart;
   }

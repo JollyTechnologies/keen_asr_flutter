@@ -50,6 +50,7 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         speakingTask: NativeSpeakingTask,
         name: String,
         alternativePronunciations: [NativeAlternativePronunciation],
+        spokenNoiseProbability: Double,
         completion: @escaping (Result<Bool, any Error>) -> Void
     ) {
         launch(for: completion) {
@@ -58,6 +59,7 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
                 for: recognizer(),
                 usingAlternativePronunciations: alternativePronunciations.map { $0.toIos() },
                 andTask: speakingTask.toIos(),
+                withSpokenNoiseProbability: Float(spokenNoiseProbability),
                 andSaveWithName: name
             )
         }
@@ -68,6 +70,7 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         speakingTask: NativeSpeakingTask,
         name: String,
         alternativePronunciations: [NativeAlternativePronunciation],
+        spokenNoiseProbability: Double,
         completion: @escaping (Result<Bool, any Error>) -> Void
     ) {
         launch(for: completion) {
@@ -76,6 +79,7 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
                 for: recognizer(),
                 usingAlternativePronunciations: alternativePronunciations.map { $0.toIos() },
                 andTask: speakingTask.toIos(),
+                withSpokenNoiseProbability: Float(spokenNoiseProbability),
                 andSaveWithName: name
             )
         }
