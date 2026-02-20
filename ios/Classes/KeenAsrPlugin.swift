@@ -24,11 +24,13 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         completion: @escaping (Result<Bool, any Error>) -> Void
     ) {
         launch(for: completion) { [self] in
-            let result = KIOSRecognizer.initWithASRBundle(bundleName)
-            if result {
-                recognizer().delegate = self
+            if KIOSRecognizer.sharedInstance() != nil {
+                guard KIOSRecognizer.teardown() else { return false }
             }
-            return result
+            guard KIOSRecognizer.initWithASRBundle(bundleName) else { return false }
+            recognizer().delegate = self
+
+            return true
         }
     }
 
@@ -113,13 +115,11 @@ public class KeenAsrPlugin: NSObject, FlutterPlugin, NativeKeenASR,
         }
     }
 
-    func startListening(completion: @escaping (Result<Bool, any Error>) -> Void)
-    {
+    func startListening(completion: @escaping (Result<Bool, any Error>) -> Void) {
         launch(for: completion) { recognizer().startListening(nil) }
     }
 
-    func stopListening(completion: @escaping (Result<Bool, any Error>) -> Void)
-    {
+    func stopListening(completion: @escaping (Result<Bool, any Error>) -> Void) {
         launch(for: completion) {
             recognizer().stopListening()
             return true
